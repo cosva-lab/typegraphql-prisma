@@ -1,28 +1,38 @@
-name: Deploy
+name: Pull Request Workflow
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
+  checks:
     # runs-on: blacksmith-4vcpu-ubuntu-2404
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x]
-
     services:
-      db:
-        image: postgres:14.4-alpine
+      postgres:
+        image: postgres:15
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
           POSTGRES_DB: typegraphql-prisma
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432
+
+    strategy:
+      matrix:
+        node-version: [20.x, 21.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -58,31 +68,3 @@ jobs:
         env:
           CI: true
           TEST_DATABASE_URL: postgresql://user:password@localhost:5432/typegraphql-prisma
-
-  deploy-website:
-    if: ${{ github.ref == 'refs/heads/main' }}
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-
-      - name: Build Docusaurus website
-        run: |
-          cd website
-          npm i
-          npm run build
-
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website/build
-          user_name: "gh-actions"
-          user_email: "actions@github.com"
-          commit_message: |
-            Deploy website
-            Deploy website version based on

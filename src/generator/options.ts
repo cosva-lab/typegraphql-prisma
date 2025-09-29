@@ -14,8 +14,9 @@ export interface ExternalGeneratorOptions {
   useSimpleInputs?: boolean;
   omitInputFieldsByDefault?: string[];
   omitOutputFieldsByDefault?: string[];
-  formatGeneratedCode?: boolean | "prettier" | "tsc";
+  formatGeneratedCode?: boolean | "prettier" | "tsc" | "biome";
   emitIsAbstract?: boolean;
+  verboseLogging?: boolean;
 }
 
 export interface InternalGeneratorOptions {
