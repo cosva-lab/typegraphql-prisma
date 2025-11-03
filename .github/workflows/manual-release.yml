@@ -289,7 +289,7 @@ jobs:
           fi
 
           echo "🔍 DRY RUN: Would publish to npm"
-          echo "Package: @scope3/typegraphql-prisma@${{ steps.bump_version.outputs.new_version }}"
+          echo "Package: @cosva-lab/typegraphql-prisma@${{ steps.bump_version.outputs.new_version }}"
           echo "Tag: $_tag"
           echo "Access: public"
 
